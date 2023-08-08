@@ -109,6 +109,10 @@ void loop() {
     rfid.uid.uidByte[3] != nuidPICC[3] ) {
     Serial.println(F("A new card has been detected."));
 
+    // Se vacian los ID
+    ID = "";
+    ID2 = "";
+
     // Store NUID into nuidPICC array
     for (byte i = 0; i < 4; i++) {
       nuidPICC[i] = rfid.uid.uidByte[i];
