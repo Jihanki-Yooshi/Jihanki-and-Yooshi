@@ -32,13 +32,20 @@
 
 #include <SPI.h>
 #include <MFRC522.h>
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
+#include <ListLib.h>
 
 #define SS_PIN 53
 #define RST_PIN 5
  
-String a = "";
+String ID = "";
+String ID2 = "";
+List<String> ID_R;
 
 MFRC522 rfid(SS_PIN, RST_PIN); // Instance of the class
+
+LiquidCrystal_I2C lcd(0x27,16,2);
 
 MFRC522::MIFARE_Key key; 
 
@@ -46,17 +53,32 @@ MFRC522::MIFARE_Key key;
 byte nuidPICC[4];
 
 void setup() { 
+  // Pantalla LCD
+  lcd.init();                      // initialize the lcd 
+  lcd.init();
+  // Print a message to the LCD.
+  lcd.backlight();
+  lcd.setCursor(3,0);
+  lcd.print("Hello, world!");
+  lcd.setCursor(2,1);
+  lcd.print("Ywrobot Arduino!");
+   lcd.setCursor(0,2);
+  lcd.print("Arduino LCM IIC 2004");
+   lcd.setCursor(2,3);
+  lcd.print("Power By Ec-yuan!");
+
+  // RFID
   Serial.begin(9600);
   SPI.begin(); // Init SPI bus
   rfid.PCD_Init(); // Init MFRC522 
 
   for (byte i = 0; i < 6; i++) {
-    key.keyByte[i] = 0xFF;
+    //key.keyByte[i] = 0xFF;
   }
 
   Serial.println(F("This code scan the MIFARE Classsic NUID."));
   Serial.print(F("Using the following key:"));
-  printHex(key.keyByte, MFRC522::MF_KEY_SIZE);
+  //printHex(key.keyByte, MFRC522::MF_KEY_SIZE);
 }
  
 void loop() {
@@ -91,14 +113,24 @@ void loop() {
     for (byte i = 0; i < 4; i++) {
       nuidPICC[i] = rfid.uid.uidByte[i];
     }
-   
+    lcd.clear();
     Serial.println(F("The NUID tag is:"));
     Serial.print(F("In hex: "));
     printHex(rfid.uid.uidByte, rfid.uid.size);
+    lcd.setCursor(0, 0);
+    lcd.print(ID);
+
+    // Registrar tarjeta
+    ID_R.Add(ID);
+
     Serial.println();
     Serial.print(F("In dec: "));
     printDec(rfid.uid.uidByte, rfid.uid.size);
+    lcd.setCursor(0, 1);
+    lcd.print(ID2);
     Serial.println();
+
+    Serial.print(ID_R[0]);
   }
   else Serial.println(F("Card read previously."));
 
@@ -117,6 +149,8 @@ void printHex(byte *buffer, byte bufferSize) {
   for (byte i = 0; i < bufferSize; i++) {
     Serial.print(buffer[i] < 0x10 ? " 0" : " ");
     Serial.print(buffer[i], HEX);
+    ID.concat(String(buffer[i] < 0x10 ? " 0" : " "));
+    ID.concat(String(buffer[i], HEX));
   }
 }
 
@@ -127,5 +161,7 @@ void printDec(byte *buffer, byte bufferSize) {
   for (byte i = 0; i < bufferSize; i++) {
     Serial.print(buffer[i] < 0x10 ? " 0" : " ");
     Serial.print(buffer[i], DEC);
+    ID2.concat(String(buffer[i] < 0x10 ? " 0" : " "));
+    ID2.concat(String(buffer[i], DEC));
   }
 }
