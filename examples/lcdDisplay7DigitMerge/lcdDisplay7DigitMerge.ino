@@ -1,3 +1,4 @@
+
 /*
 Esta es la prueba con el dispolay de 7 segmentos, el lcd y
 cosas de la comunicación serial.
@@ -20,6 +21,9 @@ cuando el touch se refresca.
     #undef __FlashStringHelper::F(string_literal)
     #define F(string_literal) string_literal
 #endif
+
+//Libreria para la lista
+#include <ListLib.h>
 
 #define aPin 9   //Antes 9        
 #define bPin 13  //             _____
@@ -88,24 +92,77 @@ Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 
 //Variables
 int oldcolor, currentcolor;
-int i = 0;
+int currentOrder = 0;
 
+//Variedad de comida
 String comida1 = "Hamburguesa";
 String comida2 = "Hot-Dog";
 String comida3 = "Pizza";
 String comida4 = "Sushi";
-String comidaM1 = comida1;
-String comidaM2 = comida2;
+String orderItem1 = "";
+String orderItem2 = "";
+
+//Variables de orden
+List<String> listOne;
+List<String> listTwo;
+List<int> ordenesListas;
+String nullMsg[] = {"Orden lista", "O no hay"};
+
+//Datos estaticos para probar
+String comidaM1[] = {comida1, comida2};
+String comidaM2[] = {comida1, comida3};
+String comidaM3[] = {comida1, comida4};
+String comidaM4[] = {comida2, comida1};
+String comidaM5[] = {comida2, comida3};
+String comidaM6[] = {comida2, comida4};
+String comidaM7[] = {comida3, comida1};
+String comidaM8[] = {comida3, comida2};
+String comidaM9[] = {comida3, comida4};
 
 //Comunicacion serial
 char mystr[] = "Hello";
+
+
 
 void setup() {
   Serial.begin(9600);
   //Prueba serial
   Serial.write(mystr,5);
   delay(1000);
+
+  //Meter las ordenes estaticas de prueba
+  listOne.Add(comidaM1[0]);
+  listTwo.Add(comidaM1[1]);
+
+  listOne.Add(comidaM2[0]);
+  listTwo.Add(comidaM2[1]);
+
+  listOne.Add(comidaM3[0]);
+  listTwo.Add(comidaM3[1]);
+
+  listOne.Add(comidaM4[0]);
+  listTwo.Add(comidaM4[1]);
+
+  listOne.Add(comidaM5[0]);
+  listTwo.Add(comidaM5[1]);
+
+  listOne.Add(comidaM6[0]);
+  listTwo.Add(comidaM6[1]);
+
+  listOne.Add(comidaM7[0]);
+  listTwo.Add(comidaM7[1]);
+
+  listOne.Add(comidaM8[0]);
+  listTwo.Add(comidaM8[1]);
+
+  listOne.Add(comidaM9[0]);
+  listTwo.Add(comidaM9[1]);
   
+  //Dar los dos primero valores a ser imprimidos en las ordenes
+  orderItem1 = listOne[currentOrder];
+  orderItem2 = listTwo[currentOrder];
+  
+  //Meterlos a las variables
   
   //Displa
   pinMode(bt_up,    INPUT_PULLUP);
@@ -133,10 +190,13 @@ void setup() {
   }
 
   //LCD
+  //Inicialización del LCD
   tft.reset();
   
   uint16_t identifier = tft.readID();
 
+  //buscador de driver para el lcd
+  //Comentar los serial print para el producto final para evitar interferencias.
   if(identifier == 0x9325) {
     Serial.println(F("Found ILI9325 LCD driver"));
   } else if(identifier == 0x9328) {
@@ -148,6 +208,7 @@ void setup() {
   } else if(identifier == 0x8357) {
     Serial.println(F("Found HX8357D LCD driver"));
   } else {
+    //Mensaje si no se encuentra algun driver
     Serial.print(F("Unknown LCD driver chip: "));
     Serial.println(identifier, HEX);
     Serial.println(F("If using the Adafruit 2.8\" TFT Arduino shield, the line:"));
@@ -156,17 +217,21 @@ void setup() {
     Serial.println(F("If using the breakout board, it should NOT be #defined!"));
     Serial.println(F("Also if using the breakout, double-check that all wiring"));
     Serial.println(F("matches the tutorial."));
+    //Como no se encontró el driver, se cerrará el setup y la ejecución del programa se finalizará.
     return;
   }
 
   tft.begin(identifier);
   tft.setRotation(1);
-  tft.fillScreen(WHITE);
+  tft.fillScreen(BLUE);
+  tft.setTextSize(3);
+  tft.print("Cargando...");
 
   currentcolor = RED;
  
   pinMode(40, OUTPUT);
 
+  //Inilización de los displays de 7 segmentos
   // Indicate that system is ready
   for (int i = 9; i >= 0; i--) {
     showNumber(i);
@@ -174,16 +239,27 @@ void setup() {
     digitalWrite(c2Pin, Common);
     digitalWrite(c3Pin, Common);
     digitalWrite(c4Pin, Common);
-    delay(1000);
+    delay(500);
   }
 
-  //Algo mas del lcd
+  //Definición de la presión máxima y minima del touchscreen
+  //En otras palabras, que tan debil o fuerte debe ser el pulso para
+  //ser aceptado como una entrada.
   #define MINPRESSURE 10
   #define MAXPRESSURE 1000
-  
+
+  //Listo para usar el LCD
+  tft.fillScreen(WHITE);
+  tft.setCursor(0,0);
+  tft.setTextColor(BLACK);
+  tft.print("Toque este texto en la pantalla para poder iniciar");
 }
 
+
+
 void loop() {
+  
+  //Lógica de los display de 7 segmentos.
   if (digitalRead (bt_up) == 0) {
     if (flag1 == 0) {
       flag1 = 1;
@@ -259,7 +335,8 @@ void loop() {
   // pressure of 0 means no pressing!
 
   if (p.z > MINPRESSURE && p.z < MAXPRESSURE) {
-    text();
+    //Se refresca el display con el texto
+    //text();
 
 
     // scale from 0->1023 to tft.width
@@ -271,30 +348,67 @@ void loop() {
     Serial.println(")");
     
     if (p.x < 80) {
+      //Si le tocas dentro de la pantalla creo?
+      //Creo que es para delimitar el rango en x?
+      //Y tambien si la lista de ordenes no esta vacia
        oldcolor = currentcolor;
 
        if (p.y < 80) { 
-         comidaM1 = comida1;
-         comidaM2 = comida2;
-         Serial.print("Anterior");
-       } else if (p.y < 170) {
-         i++;
-         comidaM1 = comida3;
-         comidaM2 = comida4;
+         //Si está en el rango del rectangulo inferior izquierdo (ANTERIOR)
+         if(currentOrder > 0) {
+          //Si la orden no es igual a 0
+            currentOrder--;
+            if(ordenesListas.Contains(currentOrder)){
+              //Cuando se da para atras pero esa orden ya está lista
+              nullMsgSet();
+            }else{
+              orderItem1 = listOne[currentOrder];
+              orderItem2 = listTwo[currentOrder];
+            }
+            Serial.print("Anterior"); 
+         }
+       } else if (p.y < 170 && currentOrder < listOne.Count()) {
+         //Si está en el rango del rectangulo inferior izquierdo (SIGUIENTE)
+         //Y tambien si está dentro de los elementos que tiene la lista
+         currentOrder++;
+         if(ordenesListas.Contains(currentOrder)){
+          //Cuando se da adelante pero esa orden ya está lista
+          nullMsgSet();
+         }else{
+          orderItem1 = listOne[currentOrder];
+          orderItem2 = listTwo[currentOrder];
+         }
          Serial.print("Siguiente");
        } else if (p.y < 240) {
+        if(!ordenesListas.Contains(currentOrder)){
+          ordenesListas.Add(currentOrder);
+          nullMsgSet();
+        }
          Serial.print("Listo");
        }
 
+    }else{
+      nullMsgSet();
     }
-    
+    text();
   }
 }
 
-//LCd
+//Poner texto nullo a la pantalla
+//Osea, que no hay orden o está lista
+void nullMsgSet(){
+  orderItem1 = nullMsg[0];
+  orderItem2 = nullMsg[1]; 
+}
+
+
+
+//Establecer el texto del LCD, junto
+//con la orden en si
 int text() {
   tft.fillScreen(WHITE);
 
+  //Poner el cursor en el centro
   tft.setCursor(0, 0);
   tft.setTextColor(BLACK);
   tft.setTextSize(3);
@@ -303,12 +417,13 @@ int text() {
   tft.fillRect(0, 0, tft.width(), 25, BLUE);
   tft.setTextColor(WHITE);
   tft.print("Orden numero: ");
-  tft.println(i);
+  tft.println(currentOrder);
 
+  //Escribir la orden
   tft.setTextColor(BLACK);
   tft.setTextSize(4);
-  tft.println(comidaM1);
-  tft.println(comidaM2);
+  tft.println(orderItem1);
+  tft.println(orderItem2);
   tft.println();
 
   // Dibujar el rectángulo morado en la parte inferior
@@ -317,15 +432,15 @@ int text() {
   tft.fillRect(tft.width() / 3 + 1, tft.height() - rectHeight, tft.width() / 3, rectHeight, BLACK);
   tft.fillRect(tft.width() / 3 * 2 + 2, tft.height() - rectHeight, tft.width() / 3, rectHeight, BLUE);
 
-  // Texto "Eliminar" en la mitad izquierda (rojo)
+  // Texto "<--" en la mitad izquierda (rojo)
   tft.setTextColor(WHITE);
-  tft.setTextSize(2);
+  tft.setTextSize(4);
   tft.setCursor(10, tft.height() - rectHeight + 10);
   tft.println("<--");
 
-  // Texto "Siguiente" en la mitad derecha (verde)
+  // Texto "-->" en la mitad derecha negro)
   tft.setTextColor(WHITE);
-  tft.setTextSize(2);
+  tft.setTextSize(4);
   tft.setCursor(tft.width() / 3 + 10, tft.height() - rectHeight + 10);
   tft.println("-->");
 
