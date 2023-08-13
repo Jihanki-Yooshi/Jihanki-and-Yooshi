@@ -42,6 +42,11 @@
 String ID = "";
 String ID2 = "";
 List<String> ID_R;
+List<String> ORDER;
+
+// Pines envio de orden
+int pinBTN = 26;
+int pinLED = 27;
 
 MFRC522 rfid(SS_PIN, RST_PIN); // Instance of the class
 
@@ -52,7 +57,16 @@ MFRC522::MIFARE_Key key;
 // Init array that will store new NUID 
 byte nuidPICC[4];
 
+int estadoAnterior = HIGH;
+unsigned long tiempoDebounce = 50;
+unsigned long tiempoUltimoCambio = 0;
+
 void setup() { 
+
+  // Declarar pinMode's
+  pinMode(26,INPUT);
+  pinMode(27,OUTPUT);
+
   // Pantalla LCD
   lcd.init();                      // initialize the lcd 
   lcd.init();
@@ -82,6 +96,23 @@ void setup() {
 }
  
 void loop() {
+
+  int estadoBoton = digitalRead(pinBTN);
+
+  if (estadoBoton != estadoAnterior) {
+    tiempoUltimoCambio = millis();
+  }
+
+  if (millis() - tiempoUltimoCambio > tiempoDebounce) {
+    if (estadoBoton == HIGH) {
+      delay(100);
+      //Serial.println("Hola");
+      digitalWrite(pinLED, !digitalRead(pinLED));  // Cambia el estado del LED
+
+    }
+  }
+
+  estadoAnterior = estadoBoton;
 
   // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
   if ( ! rfid.PICC_IsNewCardPresent())
@@ -124,8 +155,14 @@ void loop() {
     lcd.setCursor(0, 0);
     lcd.print(ID);
 
-    // Registrar tarjeta
-    ID_R.Add(ID);
+    // Registrar tarjeta si no se encuentra ya registrada
+    for(int i = 0; i < ID_R.Count(); i ++){
+      if(ID_R[i] == ID){
+        break;
+      } else {
+        ID_R.Add(ID);
+      }
+    }
 
     Serial.println();
     Serial.print(F("In dec: "));

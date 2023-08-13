@@ -161,7 +161,7 @@ void setup() {
 
   tft.begin(identifier);
   tft.setRotation(1);
-  tft.fillScreen(BLACK);
+  tft.fillScreen(WHITE);
 
   currentcolor = RED;
  
@@ -273,15 +273,18 @@ void loop() {
     if (p.x < 80) {
        oldcolor = currentcolor;
 
-       if (p.y < 131) { 
+       if (p.y < 80) { 
          comidaM1 = comida1;
          comidaM2 = comida2;
-         
-       } else if (p.y < 240) {
+         Serial.print("Anterior");
+       } else if (p.y < 170) {
+         i++;
          comidaM1 = comida3;
          comidaM2 = comida4;
-         
-       } 
+         Serial.print("Siguiente");
+       } else if (p.y < 240) {
+         Serial.print("Listo");
+       }
 
     }
     
@@ -290,10 +293,10 @@ void loop() {
 
 //LCd
 int text() {
-  tft.fillScreen(BLACK);
+  tft.fillScreen(WHITE);
 
   tft.setCursor(0, 0);
-  tft.setTextColor(WHITE);
+  tft.setTextColor(BLACK);
   tft.setTextSize(3);
 
   // Fondo azul para la línea "Orden numero: "
@@ -302,6 +305,7 @@ int text() {
   tft.print("Orden numero: ");
   tft.println(i);
 
+  tft.setTextColor(BLACK);
   tft.setTextSize(4);
   tft.println(comidaM1);
   tft.println(comidaM2);
@@ -309,20 +313,27 @@ int text() {
 
   // Dibujar el rectángulo morado en la parte inferior
   int rectHeight = tft.height() / 4;
-  tft.fillRect(0, tft.height() - rectHeight, tft.width() / 2, rectHeight, RED);
-  tft.fillRect(tft.width() / 2, tft.height() - rectHeight, tft.width() / 2, rectHeight, GREEN);
+  tft.fillRect(0, tft.height() - rectHeight, tft.width() / 3, rectHeight, RED);
+  tft.fillRect(tft.width() / 3 + 1, tft.height() - rectHeight, tft.width() / 3, rectHeight, BLACK);
+  tft.fillRect(tft.width() / 3 * 2 + 2, tft.height() - rectHeight, tft.width() / 3, rectHeight, BLUE);
 
   // Texto "Eliminar" en la mitad izquierda (rojo)
   tft.setTextColor(WHITE);
   tft.setTextSize(2);
   tft.setCursor(10, tft.height() - rectHeight + 10);
-  tft.println("Eliminar");
+  tft.println("<--");
 
   // Texto "Siguiente" en la mitad derecha (verde)
-  tft.setTextColor(BLACK);
+  tft.setTextColor(WHITE);
   tft.setTextSize(2);
-  tft.setCursor(tft.width() / 2 + 10, tft.height() - rectHeight + 10);
-  tft.println("Siguiente");
+  tft.setCursor(tft.width() / 3 + 10, tft.height() - rectHeight + 10);
+  tft.println("-->");
+
+  // Texto "Listo" (azul)
+  tft.setTextColor(WHITE);
+  tft.setTextSize(2);
+  tft.setCursor(tft.width() / 3 * 2 + 15, tft.height() - rectHeight + 10);
+  tft.println("Listo");
 
   //delay(1000);
 }
