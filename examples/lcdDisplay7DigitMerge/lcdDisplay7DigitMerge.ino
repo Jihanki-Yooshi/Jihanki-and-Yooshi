@@ -94,6 +94,11 @@ Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 int oldcolor, currentcolor;
 int currentOrder = 0;
 
+//Variables para receptor serial
+String inputString1;
+String inputString2;
+bool orderRecieved = false;
+
 //Variedad de comida
 String comida1 = "Hamburguesa";
 String comida2 = "Hot-Dog";
@@ -492,6 +497,44 @@ int text() {
   tft.println("Listo");
 
   //delay(1000);
+}
+
+//Serial receptor
+void serialEvent() {
+  bool validEntry = false;
+  bool orderOne = true;
+  
+  while (Serial.available()) {
+    // get the new byte:
+    char inChar = (char)Serial.read();
+    if(inChar == '<'){
+      //Verificar la entrada del texto para recibir
+      validEntry = true;
+      //Establece para escribir la primera parte de la orden
+      orderOne = true;
+      //Limpia los input strings
+      inputString1 = "";
+      inputString2 = "";
+    }else if(inChar == ',' && validEntry){
+      //Separador entre las dos ordenes
+      orderOne = false;
+    }else if(inChar == '>'  && validEntry){
+      //Final de la orden completa, ya sea una o dos
+      validEntry = false;
+      orderOne = true;
+      orderRecieved = true;
+    }else if(validEntry) {
+      //Entrada correcta del texto
+      if(orderOne){
+        //Entrada del texto de la primera orden
+        inputString1 += inChar;
+      }else{
+        //Entrada del texto de la segunda orden
+        inputString2 + inChar;
+      }
+    }
+  }
+  
 }
 
 //7Display
