@@ -1,16 +1,16 @@
 
 /*
-Esta es la prueba con el dispolay de 7 segmentos, el lcd y
-cosas de la comunicación serial.
-La ultima prueba de este sketch funciona el display
-de 7 segmentos y el touchscreen.
-Unico "problema" que se ve es que el display se refresca
-cuando el touch se refresca.
+  Esta es la prueba con el dispolay de 7 segmentos, el lcd y
+  cosas de la comunicación serial.
+  La ultima prueba de este sketch funciona el display
+  de 7 segmentos y el touchscreen.
+  Unico "problema" que se ve es que el display se refresca
+  cuando el touch se refresca.
 */
 
 /*Librerias viejas
-#include <LCDWIKI_GUI.h> //Core graphics library
-#include <LCDWIKI_KBV.h> //Hardware-specific library
+  #include <LCDWIKI_GUI.h> //Core graphics library
+  #include <LCDWIKI_KBV.h> //Hardware-specific library
 */
 //Librerias viejas
 #include <Adafruit_GFX.h>    // Core graphics library
@@ -18,8 +18,8 @@ cuando el touch se refresca.
 #include <TouchScreen.h>
 
 #if defined(__SAM3X8E__)
-    #undef __FlashStringHelper::F(string_literal)
-    #define F(string_literal) string_literal
+#undef __FlashStringHelper::F(string_literal)
+#define F(string_literal) string_literal
 #endif
 
 //Libreria para la lista
@@ -102,23 +102,55 @@ String comida4 = "Sushi";
 String orderItem1 = "";
 String orderItem2 = "";
 
+//Creacion de una estructura de datos (una clase)
+//Para organizar las ordenes
+/*Pero ni agarro xd
+  class Order {
+  public:
+    String item1;
+    String item2;
+    int numOrder;
+
+     void setItem1(String  item){
+      item1 = item;
+     }
+     void getItem1(){
+      return item1;
+     }
+     void setItem2(String  item){
+      item2 = item;
+     }
+     void getItem2(){
+      return item2;
+     }
+     void setNumOrder(String  item){
+      item1 = item;
+     }
+     void getNumOrder(){
+      return numOrder;
+     }
+  }
+*/
+
 //Variables de orden
-List<String> listOne;
-List<String> listTwo;
-List<int> ordenesListas;
+//List<Order> ordenes; Prueba con una estructura de datos fallida
+const int listCapacity = 10;
+List<String> listOne(listCapacity);
+List<String> listTwo(listCapacity);
+List<int> ordenesListas(listCapacity);
 String nullMsg[] = {"Orden lista", "O no hay"};
 
 //Datos estaticos para probar
 String comidaM1[] = {comida1, comida2};
 String comidaM2[] = {comida1, comida3};
 String comidaM3[] = {comida1, comida4};
-//String comidaM4[] = {comida3, comida2};
-//String comidaM5[] = {comida4, comida3};
-/*
-String comidaM6[] = {comida2, comida4};
-String comidaM7[] = {comida3, comida1};
-String comidaM8[] = {comida3, comida2};
-String comidaM9[] = {comida3, comida4};*/
+String comidaM4[] = {comida3, comida2};
+String comidaM5[] = {comida4, comida3};
+
+  String comidaM6[] = {comida2, comida4};
+  String comidaM7[] = {comida3, comida1};
+  String comidaM8[] = {comida3, comida2};
+  String comidaM9[] = {comida3, comida4};
 
 //Comunicacion serial
 char mystr[] = "HelloWorld";
@@ -128,10 +160,18 @@ char mystr[] = "HelloWorld";
 void setup() {
   Serial.begin(9600);
   //Prueba serial
-  Serial.write(mystr,10);
+  Serial.write(mystr, 10);
   delay(1000);
 
   //Meter las ordenes estaticas de prueba
+  /*prueba con estructura de datos fallida
+    ordenes.Add({comida1, comida2, 0});
+    ordenes.Add({comida1, comida3, 1});
+    ordenes.Add({comida1, comida4, 2});
+    ordenes.Add({comida3, comida4, 3});
+    ordenes.Add({comida2, comida4, 4});
+  */
+
   listOne.Add(comidaM1[0]);
   listTwo.Add(comidaM1[1]);
 
@@ -140,21 +180,33 @@ void setup() {
 
   listOne.Add(comidaM3[0]);
   listTwo.Add(comidaM3[1]);
-/*
+
   listOne.Add(comidaM4[0]);
   listTwo.Add(comidaM4[1]);
-
+  
   listOne.Add(comidaM5[0]);
   listTwo.Add(comidaM5[1]);
-*/
-Serial.print("TESTE");
+
+  listOne.Add(comidaM6[0]);
+  listTwo.Add(comidaM6[1]);
+
+  listOne.Add(comidaM7[0]);
+  listTwo.Add(comidaM7[1]);
+
+  listOne.Add(comidaM8[0]);
+  listTwo.Add(comidaM8[1]);
   
+  listOne.Add(comidaM9[0]);
+  listTwo.Add(comidaM9[1]);
+  
+  Serial.print("TESTE");
+
   //Dar los dos primero valores a ser imprimidos en las ordenes
   orderItem1 = listOne[currentOrder];
   orderItem2 = listTwo[currentOrder];
-  
+
   //Meterlos a las variables
-  
+
   //Displa
   pinMode(bt_up,    INPUT_PULLUP);
   pinMode(bt_down,  INPUT_PULLUP);
@@ -183,20 +235,20 @@ Serial.print("TESTE");
   //LCD
   //Inicialización del LCD
   tft.reset();
-  
+
   uint16_t identifier = tft.readID();
 
   //buscador de driver para el lcd
   //Comentar los serial print para el producto final para evitar interferencias.
-  if(identifier == 0x9325) {
+  if (identifier == 0x9325) {
     Serial.println(F("Found ILI9325 LCD driver"));
-  } else if(identifier == 0x9328) {
+  } else if (identifier == 0x9328) {
     Serial.println(F("Found ILI9328 LCD driver"));
-  } else if(identifier == 0x7575) {
+  } else if (identifier == 0x7575) {
     Serial.println(F("Found HX8347G LCD driver"));
-  } else if(identifier == 0x9341) {
+  } else if (identifier == 0x9341) {
     Serial.println(F("Found ILI9341 LCD driver"));
-  } else if(identifier == 0x8357) {
+  } else if (identifier == 0x8357) {
     Serial.println(F("Found HX8357D LCD driver"));
   } else {
     //Mensaje si no se encuentra algun driver
@@ -219,7 +271,7 @@ Serial.print("TESTE");
   tft.print("Cargando...");
 
   currentcolor = RED;
- 
+
   pinMode(40, OUTPUT);
 
   //Inilización de los displays de 7 segmentos
@@ -236,12 +288,12 @@ Serial.print("TESTE");
   //Definición de la presión máxima y minima del touchscreen
   //En otras palabras, que tan debil o fuerte debe ser el pulso para
   //ser aceptado como una entrada.
-  #define MINPRESSURE 10
-  #define MAXPRESSURE 1000
+#define MINPRESSURE 10
+#define MAXPRESSURE 1000
 
   //Listo para usar el LCD
   tft.fillScreen(WHITE);
-  tft.setCursor(0,0);
+  tft.setCursor(0, 0);
   tft.setTextColor(BLACK);
   tft.print("Toque este texto en la pantalla para poder iniciar");
 }
@@ -249,7 +301,7 @@ Serial.print("TESTE");
 
 
 void loop() {
-  
+
   //Lógica de los display de 7 segmentos.
   if (digitalRead (bt_up) == 0) {
     if (flag1 == 0) {
@@ -333,50 +385,50 @@ void loop() {
     // scale from 0->1023 to tft.width
     p.x = map(p.x, TS_MINX, TS_MAXX, tft.width(), 0);
     p.y = map(p.y, TS_MINY, TS_MAXY, tft.height(), 0);
-    
+
     Serial.print("("); Serial.print(p.x);
     Serial.print(", "); Serial.print(p.y);
     Serial.println(")");
-    
+
     if (p.x < 80) {
       //Si le tocas dentro de la pantalla creo?
       //Creo que es para delimitar el rango en x?
       //Y tambien si la lista de ordenes no esta vacia
-       oldcolor = currentcolor;
+      oldcolor = currentcolor;
 
-       if (p.y < 80) { 
-         //Si está en el rango del rectangulo inferior izquierdo (ANTERIOR)
-         if(currentOrder > 0) {
+      if (p.y < 80) {
+        //Si está en el rango del rectangulo inferior izquierdo (ANTERIOR)
+        if (currentOrder > 0) {
           //Si la orden no es igual a 0
-            currentOrder--;
-            if(ordenesListas.Contains(currentOrder)){
-              //Cuando se da para atras pero esa orden ya está lista
-              nullMsgSet();
-            }else{
-              orderItem1 = listOne[currentOrder];
-              orderItem2 = listTwo[currentOrder];
-            }
-            Serial.print("Anterior"); 
-         }
-       } else if (p.y < 170 && currentOrder < listOne.Count()) {
-         //Si está en el rango del rectangulo inferior izquierdo (SIGUIENTE)
-         //Y tambien si está dentro de los elementos que tiene la lista
-         currentOrder++;
-         if(ordenesListas.Contains(currentOrder)){
+          currentOrder--;
+          if (ordenesListas.Contains(currentOrder)) {
+            //Cuando se da para atras pero esa orden ya está lista
+            nullMsgSet();
+          } else {
+            orderItem1 = listOne[currentOrder];
+            orderItem2 = listTwo[currentOrder];
+          }
+          Serial.print("Anterior");
+        }
+      } else if (p.y < 170 && currentOrder < listOne.Count() ) {
+        //Si está en el rango del rectangulo inferior izquierdo (SIGUIENTE)
+        //Y tambien si está dentro de los elementos que tiene la lista
+        currentOrder++;
+        if (ordenesListas.Contains(currentOrder)) {
           //Cuando se da adelante pero esa orden ya está lista
           nullMsgSet();
-         }else{
+        } else {
           orderItem1 = listOne[currentOrder];
           orderItem2 = listTwo[currentOrder];
-         }
-         Serial.print("Siguiente");
-       } else if (p.y < 240) {
-        if(!ordenesListas.Contains(currentOrder)){
+        }
+        Serial.print("Siguiente");
+      } else if (p.y < 240) {
+        if (!ordenesListas.Contains(currentOrder)) {
           ordenesListas.Add(currentOrder);
           nullMsgSet();
         }
-         Serial.print("Listo");
-       }
+        Serial.print("Listo");
+      }
 
     }
     text();
@@ -385,9 +437,9 @@ void loop() {
 
 //Poner texto nullo a la pantalla
 //Osea, que no hay orden o está lista
-void nullMsgSet(){
+void nullMsgSet() {
   orderItem1 = nullMsg[0];
-  orderItem2 = nullMsg[1]; 
+  orderItem2 = nullMsg[1];
 }
 
 
