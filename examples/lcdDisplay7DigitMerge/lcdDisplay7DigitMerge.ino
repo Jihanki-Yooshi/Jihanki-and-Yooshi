@@ -112,22 +112,23 @@ String nullMsg[] = {"Orden lista", "O no hay"};
 String comidaM1[] = {comida1, comida2};
 String comidaM2[] = {comida1, comida3};
 String comidaM3[] = {comida1, comida4};
-String comidaM4[] = {comida2, comida1};
-String comidaM5[] = {comida2, comida3};
+//String comidaM4[] = {comida3, comida2};
+//String comidaM5[] = {comida4, comida3};
+/*
 String comidaM6[] = {comida2, comida4};
 String comidaM7[] = {comida3, comida1};
 String comidaM8[] = {comida3, comida2};
-String comidaM9[] = {comida3, comida4};
+String comidaM9[] = {comida3, comida4};*/
 
 //Comunicacion serial
-char mystr[] = "Hello";
+char mystr[] = "HelloWorld";
 
 
 
 void setup() {
   Serial.begin(9600);
   //Prueba serial
-  Serial.write(mystr,5);
+  Serial.write(mystr,10);
   delay(1000);
 
   //Meter las ordenes estaticas de prueba
@@ -139,24 +140,14 @@ void setup() {
 
   listOne.Add(comidaM3[0]);
   listTwo.Add(comidaM3[1]);
-
+/*
   listOne.Add(comidaM4[0]);
   listTwo.Add(comidaM4[1]);
 
   listOne.Add(comidaM5[0]);
   listTwo.Add(comidaM5[1]);
-
-  listOne.Add(comidaM6[0]);
-  listTwo.Add(comidaM6[1]);
-
-  listOne.Add(comidaM7[0]);
-  listTwo.Add(comidaM7[1]);
-
-  listOne.Add(comidaM8[0]);
-  listTwo.Add(comidaM8[1]);
-
-  listOne.Add(comidaM9[0]);
-  listTwo.Add(comidaM9[1]);
+*/
+Serial.print("TESTE");
   
   //Dar los dos primero valores a ser imprimidos en las ordenes
   orderItem1 = listOne[currentOrder];
@@ -387,8 +378,6 @@ void loop() {
          Serial.print("Listo");
        }
 
-    }else{
-      nullMsgSet();
     }
     text();
   }
