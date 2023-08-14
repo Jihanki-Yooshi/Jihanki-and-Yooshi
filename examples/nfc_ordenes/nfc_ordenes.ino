@@ -104,7 +104,7 @@ void loop() {
   int estBtnAddP3 = digitalRead(pinBTN_Add_P3);
   int estBtnSend = digitalRead(pinBTN_Send);
 
-  if(estBtnSend == HIGH && ORDER[0] != ""){
+  /*if(estBtnSend == HIGH && ORDER[0] != ""){
     Serial.print("<" + ORDER[0] + "-" + ORDER[1] + ">");
     ORDER[0] = "";
     ORDER[1] = "";
@@ -114,7 +114,7 @@ void loop() {
     lcd.clear();
     lcd.print("Sin orden");
     delay(2000);
-  }
+  }*/
 
   if(estBtnAddP1 == HIGH){
     cost = 0;
@@ -220,6 +220,8 @@ void loop() {
     Serial.println();
 
     Serial.print(ID_R[0]);
+
+    sendOrder();
   }
   else Serial.println(F("Card read previously."));
 
@@ -252,6 +254,20 @@ void printDec(byte *buffer, byte bufferSize) {
     Serial.print(buffer[i], DEC);
     ID2.concat(String(buffer[i] < 0x10 ? " 0" : " "));
     ID2.concat(String(buffer[i], DEC));
+  }
+}
+
+void sendOrder(){
+  if(ORDER[0] != ""){
+    Serial.print("<" + ORDER[0] + "-" + ORDER[1] + ">");
+    ORDER[0] = "";
+    ORDER[1] = "";
+    cost = 0;
+    delay(300);
+  } else if(ORDER[0] == ""){
+    lcd.clear();
+    lcd.print("Sin orden");
+    delay(2000);
   }
 }
 
