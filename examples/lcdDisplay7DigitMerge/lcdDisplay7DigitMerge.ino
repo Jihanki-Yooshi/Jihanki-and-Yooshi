@@ -42,7 +42,7 @@
 #define bt_down   46
 #define bt_reset  44
 
-long Counter = 1;
+long Counter = 0;
 
 int flag1 = 0, flag2 = 0, timer = 200;
 
@@ -83,6 +83,8 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 #define MAGENTA 0xF81F
 #define YELLOW  0xFFE0
 #define WHITE   0xFFFF
+#define PURPLE  0x58EF
+#define GREY    0x52AA
 
 
 Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
@@ -309,6 +311,8 @@ void setup() {
 
 void loop() {
 
+  Counter = currentOrder + 1;
+
   if(orderRecieved) {
     //Cuando la orden ya fue capturada por el Serial.Event()
     listOne.Add(inputString1);
@@ -471,11 +475,12 @@ int text() {
   tft.setTextColor(BLACK);
   tft.setTextSize(3);
 
-  // Fondo azul para la línea "Orden numero: "
-  tft.fillRect(0, 0, tft.width(), 25, BLUE);
+  // Fondo para la línea "Orden numero: "
+  tft.fillRect(0, 0, tft.width(), 25, PURPLE);
   tft.setTextColor(WHITE);
   tft.print("Orden numero: ");
-  tft.println(currentOrder);
+  //INcrementarle en uno para el usuario tonto
+  tft.println(currentOrder + 1);
 
   //Escribir la orden
   tft.setTextColor(BLACK);
@@ -484,11 +489,14 @@ int text() {
   tft.println(orderItem2);
   tft.println();
 
-  // Dibujar el rectángulo morado en la parte inferior
+  // Dibujar los rectangulos en la parte inferior
   int rectHeight = tft.height() / 4;
-  tft.fillRect(0, tft.height() - rectHeight, tft.width() / 3, rectHeight, RED);
+  //Rectangulo izquierdo
+  tft.fillRect(0, tft.height() - rectHeight, tft.width() / 3, rectHeight, GREY);
+  //Rectangulo del centro
   tft.fillRect(tft.width() / 3 + 1, tft.height() - rectHeight, tft.width() / 3, rectHeight, BLACK);
-  tft.fillRect(tft.width() / 3 * 2 + 2, tft.height() - rectHeight, tft.width() / 3, rectHeight, BLUE);
+  //Rectangulo derecho
+  tft.fillRect(tft.width() / 3 * 2 + 2, tft.height() - rectHeight, tft.width() / 3, rectHeight, PURPLE);
 
   // Texto "<--" en la mitad izquierda (rojo)
   tft.setTextColor(WHITE);
