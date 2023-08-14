@@ -54,6 +54,9 @@ int DTime = 4; // Display timer
 unsigned long previousMillis = 0UL;
 unsigned long interval = 3000UL;
 unsigned int displayIndex = 0;
+//Ya no es loop, por eso son estas
+unsigned int previousReady = 0;
+
 
 //LCD:
 #define YP A9  // must be an analog pin, use "An" notation!
@@ -109,9 +112,9 @@ bool orderOne = true;
 
 //Variedad de comida
 String comida1 = "Hamburguesa";
-String comida2 = "Hot-Dog";
+String comida2 = "Torta";
 String comida3 = "Pizza";
-String comida4 = "Sushi";
+String comida4 = "Coca-Cola";
 String orderItem1 = "";
 String orderItem2 = "";
 
@@ -321,7 +324,11 @@ void loop() {
     Counter = ordenesListas[0] + 1;
   }
 */
-  loopOrdenesListas();
+
+  //Ordenes del jefe, esta ya no se usa
+  //loopOrdenesListas();
+  displayOrdenesListas();
+
 
   if(orderRecieved) {
     //Cuando la orden ya fue capturada por el Serial.Event()
@@ -570,6 +577,7 @@ void serialEvent() {
   
 }
 
+//POs ya no se usa esta
 void loopOrdenesListas(){
   unsigned long currentMillis = millis();
   if(currentMillis - previousMillis > interval && !ordenesListas.IsEmpty()){
@@ -589,6 +597,13 @@ void loopOrdenesListas(){
     
     // Don't forget to update the previousMillis value
     previousMillis = currentMillis;
+  }
+}
+
+//Esta de arriba que no se usa se cambiará por esta de abajo
+void displayOrdenesListas(){
+  if(!ordenesListas.IsEmpty()){
+    Counter = ordenesListas[ordenesListas.Count()-1] + 1;
   }
 }
 
