@@ -139,7 +139,7 @@ String orderItem2 = "";
 
 //Variables de orden
 //List<Order> ordenes; Prueba con una estructura de datos fallida
-const int listCapacity = 10;
+const int listCapacity = 13;
 List<String> listOne(listCapacity);
 List<String> listTwo(listCapacity);
 List<int> ordenesListas(listCapacity);
@@ -306,6 +306,15 @@ void setup() {
 
 
 void loop() {
+
+  if(orderRecieved) {
+    //Cuando la orden ya fue capturada por el Serial.Event()
+    listOne.Add(inputString1);
+    listTwo.Add(inputString2);
+    inputString1 = "";
+    inputString2 = "";
+    orderRecieved = false;
+  }
 
   //Lógica de los display de 7 segmentos.
   if (digitalRead (bt_up) == 0) {
@@ -501,12 +510,14 @@ int text() {
 
 //Serial receptor
 void serialEvent() {
+  Serial.print("serialEvent");
   bool validEntry = false;
   bool orderOne = true;
   
   while (Serial.available()) {
     // get the new byte:
     char inChar = (char)Serial.read();
+    Serial.print(inChar);
     if(inChar == '<'){
       //Verificar la entrada del texto para recibir
       validEntry = true;
