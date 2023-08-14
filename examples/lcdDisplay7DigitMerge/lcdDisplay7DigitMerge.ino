@@ -98,6 +98,8 @@ int currentOrder = 0;
 String inputString1;
 String inputString2;
 bool orderRecieved = false;
+bool validEntry = false;
+bool orderOne = true;
 
 //Variedad de comida
 String comida1 = "Hamburguesa";
@@ -139,7 +141,7 @@ String orderItem2 = "";
 
 //Variables de orden
 //List<Order> ordenes; Prueba con una estructura de datos fallida
-const int listCapacity = 13;
+const int listCapacity = 20;
 List<String> listOne(listCapacity);
 List<String> listTwo(listCapacity);
 List<int> ordenesListas(listCapacity);
@@ -314,6 +316,7 @@ void loop() {
     inputString1 = "";
     inputString2 = "";
     orderRecieved = false;
+    
   }
 
   //Lógica de los display de 7 segmentos.
@@ -511,13 +514,13 @@ int text() {
 //Serial receptor
 void serialEvent() {
   Serial.print("serialEvent");
-  bool validEntry = false;
-  bool orderOne = true;
   
   while (Serial.available()) {
     // get the new byte:
     char inChar = (char)Serial.read();
     Serial.print(inChar);
+    Serial.println("OrderOne: ");
+    Serial.print(orderOne);
     if(inChar == '<'){
       //Verificar la entrada del texto para recibir
       validEntry = true;
@@ -526,9 +529,10 @@ void serialEvent() {
       //Limpia los input strings
       inputString1 = "";
       inputString2 = "";
-    }else if(inChar == ',' && validEntry){
+    }else if(inChar == '-' && validEntry){
       //Separador entre las dos ordenes
       orderOne = false;
+      //delay(10);
     }else if(inChar == '>'  && validEntry){
       //Final de la orden completa, ya sea una o dos
       validEntry = false;
@@ -541,7 +545,7 @@ void serialEvent() {
         inputString1 += inChar;
       }else{
         //Entrada del texto de la segunda orden
-        inputString2 + inChar;
+        inputString2 += inChar;
       }
     }
   }
