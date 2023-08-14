@@ -104,7 +104,7 @@ void loop() {
   int estBtnAddP3 = digitalRead(pinBTN_Add_P3);
   int estBtnSend = digitalRead(pinBTN_Send);
 
-  /*if(estBtnSend == HIGH && ORDER[0] != ""){
+  if(estBtnSend == HIGH && ORDER[0] != ""){
     Serial.print("<" + ORDER[0] + "-" + ORDER[1] + ">");
     ORDER[0] = "";
     ORDER[1] = "";
@@ -114,7 +114,7 @@ void loop() {
     lcd.clear();
     lcd.print("Sin orden");
     delay(2000);
-  }*/
+  }
 
   if(estBtnAddP1 == HIGH){
     cost = 0;
