@@ -50,6 +50,10 @@ int Common = 0; //<Common=1; for Common anode> <Common=0; for Common cathode>
 int On, Off, Off_C;
 int DTime = 4; // Display timer
 
+//Display Loop
+unsigned long previousMillis = 0UL;
+unsigned long interval = 3000UL;
+unsigned int displayIndex = 0;
 
 //LCD:
 #define YP A9  // must be an analog pin, use "An" notation!
@@ -310,8 +314,14 @@ void setup() {
 
 
 void loop() {
-
-  Counter = currentOrder + 1;
+/*
+  if(ordenesListas.IsEmpty() ){
+    Counter = 0;
+  }else{
+    Counter = ordenesListas[0] + 1;
+  }
+*/
+  loopOrdenesListas();
 
   if(orderRecieved) {
     //Cuando la orden ya fue capturada por el Serial.Event()
@@ -558,6 +568,28 @@ void serialEvent() {
     }
   }
   
+}
+
+void loopOrdenesListas(){
+  unsigned long currentMillis = millis();
+  if(currentMillis - previousMillis > interval && !ordenesListas.IsEmpty()){
+    /* The Arduino executes this code once every interval set in ms
+    *  (interval = 1000 (ms) = 1 second). RN: 3000ms
+    */
+    Serial.print("Dispindex: ");
+    Serial.println(displayIndex);
+    Counter = ordenesListas[displayIndex] + 1;
+    Serial.print("Displayn: ");
+    Serial.println(Counter);
+    if(displayIndex >= ordenesListas.Count() - 1){
+      displayIndex = 0;
+    }else if (displayIndex < ordenesListas.Count() - 1) {
+      displayIndex++;
+    }
+    
+    // Don't forget to update the previousMillis value
+    previousMillis = currentMillis;
+  }
 }
 
 //7Display
